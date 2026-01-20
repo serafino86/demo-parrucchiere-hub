@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💇‍♀️ Gestione Salone Beauty</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e57c2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container { max-width: 1400px; margin: 0 auto; }
+    
+    .header-card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 40px;
+      margin-bottom: 25px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      animation: slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .header-left h1 {
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    
+    .data-oggi {
+      font-size: 18px;
+      color: #777;
+      font-weight: 500;
+    }
+    
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 15px 25px;
+      border-radius: 15px;
+      border: 2px solid #dee2e6;
+    }
+    
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #4CAF50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); }
+      50% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(76, 175, 80, 0.3); }
+    }
+    
+    .status-bar.loading .status-indicator {
+      background: #ff9800;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .status-text {
+      font-size: 14px;
+      color: #555;
+      font-weight: 600;
+    }
+    
+    .refresh-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .refresh-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .refresh-btn.spin {
+      animation: rotate 0.5s ease;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .tab {
+      padding: 15px 30px;
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      color: #999;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .tab:hover { color: #667eea; }
+    
+    .tab.active {
+      color: #667eea;
+    }
+    
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 3px 3px 0 0;
+    }
+    
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* DASHBOARD */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, transparent, currentColor, transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .stat-card:hover::before { opacity: 1; }
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card h3 {
+      color: #777;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+    }
+    
+    .stat-value {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    
+    .stat-card.verde { color: #4CAF50; }
+    .stat-card.verde .stat-value { color: #4CAF50; }
+    .stat-card.rosso { color: #f44336; }
+    .stat-card.rosso .stat-value { color: #f44336; }
+    .stat-card.blu { color: #2196F3; }
+    .stat-card.blu .stat-value { color: #2196F3; }
+    .stat-card.arancione { color: #ff9800; }
+    .stat-card.arancione .stat-value { color: #ff9800; }
+    
+    /* APPUNTAMENTI */
+    .appuntamenti-container {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .appuntamenti-container h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    
+    .appuntamento-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border: 2px solid #e8e8e8;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 25px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .appuntamento-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 6px;
+      height: 100%;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.3s ease;
+    }
+    
+    .appuntamento-card:hover::before { transform: scaleY(1); }
+    .appuntamento-card:hover {
+      transform: translateX(8px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+      border-color: #667eea;
+    }
+    
+    .appuntamento-card.nuovo {
+      border-color: #4CAF50;
+      background: linear-gradient(135deg, #f1f8f4 0%, #e8f5e9 100%);
+      animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .badge-nuovo {
+      display: inline-block;
+      background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+      animation: pulseNew 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulseNew {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .orario {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .badge-fedelta {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+    }
+    
+    .cliente-nome {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    
+    .servizio-nome {
+      color: #777;
+      font-size: 17px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    
+    .info-extra {
+      background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #856404;
+      border-left: 4px solid #ffc107;
+      font-weight: 500;
+    }
+    
+    .presenza-section { margin: 20px 0; }
+    .section-title {
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 12px;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: 2px solid #e8e8e8;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+    .btn-presente { border-color: #4CAF50; color: #4CAF50; }
+    .btn-presente.selected { background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%); color: white; box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4); }
+    .btn-assente { border-color: #f44336; color: #f44336; }
+    .btn-assente.selected { background: linear-gradient(135deg, #f44336 0%, #e57373 100%); color: white; box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4); }
+    .btn-pagato { border-color: #2196F3; color: #2196F3; }
+    .btn-pagato.selected { background: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%); color: white; box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4); }
+    .btn-da-riscuotere { border-color: #ff9800; color: #ff9800; }
+    .btn-da-riscuotere.selected { background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%); color: white; box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4); }
+    
+    .prezzo-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      border: 2px solid #dee2e6;
+    }
+    
+    .prezzo-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .prezzo-input { display: flex; align-items: center; gap: 8px; }
+    
+    .prezzo-input input {
+      width: 110px;
+      padding: 12px 16px;
+      border: 2px solid #667eea;
+      border-radius: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      text-align: right;
+      transition: all 0.3s ease;
+    }
+    
+    .prezzo-input input:focus {
+      outline: none;
+      border-color: #764ba2;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .note-input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      margin-top: 15px;
+      resize: vertical;
+      min-height: 70px;
+      transition: all 0.3s ease;
+    }
+    
+    .note-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-salva {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-salva:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5); }
+    .btn-salva:active { transform: translateY(-1px); }
+    
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #999;
+    }
+    
+    .empty-state-icon {
+      font-size: 100px;
+      margin-bottom: 25px;
+      opacity: 0.5;
+    }
+    
+    /* BLOCCHI */
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-top: 25px;
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .card h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group small {
+      display: block;
+      color: #999;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+    
+    .btn-primary {
+      width: 100%;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5); }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4); }
+    
+    .blocco-item {
+      background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+      border-left: 5px solid #ff9800;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideIn 0.4s ease;
+    }
+    
+    .blocco-info strong { display: block; font-size: 16px; color: #333; margin-bottom: 5px; }
+    .blocco-info span { color: #666; font-size: 14px; }
+    
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #333 0%, #555 100%);
+      color: white;
+      padding: 18px 28px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      z-index: 2000;
+      animation: slideUpToast 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-weight: 600;
+    }
+    
+    @keyframes slideUpToast {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 1024px) {
+      .two-column { grid-template-columns: 1fr; }
+      .dashboard { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 768px) {
+      .header-content { flex-direction: column; align-items: flex-start; }
+      .btn-group { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <div class="header-card">
+      <div class="header-content">
+        <div class="header-left">
+          <h1>💇‍♀️ Gestione Salone</h1>
+          <div class="data-oggi" id="data-oggi"></div>
+        </div>
+        <div class="status-bar" id="status-bar">
+          <div class="status-indicator"></div>
+          <span class="status-text" id="status-text">Aggiornato adesso</span>
+          <button class="refresh-btn" onclick="refreshManuale()">↻</button>
+        </div>
+      </div>
+      
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('appuntamenti')">📅 Appuntamenti</button>
+        <button class="tab" onclick="switchTab('disponibilita')">🕐 Disponibilità</button>
+      </div>
+    </div>
+    
+    <!-- TAB APPUNTAMENTI -->
+    <div id="tab-appuntamenti" class="tab-content active">
+      <div class="dashboard">
+        <div class="stat-card verde"><h3>Presenti</h3><div class="stat-value" id="stat-presenti">0</div></div>
+        <div class="stat-card rosso"><h3>Assenti</h3><div class="stat-value" id="stat-assenti">0</div></div>
+        <div class="stat-card blu"><h3>Incassato</h3><div class="stat-value" id="stat-incassato">CHF 0</div></div>
+        <div class="stat-card arancione"><h3>Da riscuotere</h3><div class="stat-value" id="stat-da-riscuotere">CHF 0</div></div>
+      </div>
+      
+      <div class="appuntamenti-container">
+        <h2>📅 Appuntamenti di oggi</h2>
+        <div id="lista-appuntamenti"></div>
+      </div>
+    </div>
+    
+    <!-- TAB DISPONIBILITÀ -->
+    <div id="tab-disponibilita" class="tab-content">
+      <div class="two-column">
+        
+        <div class="card">
+          <h3>➕ Blocca Orario</h3>
+          <p style="color: #666; margin-bottom: 25px; font-size: 14px;">Gli orari bloccati vengono salvati in <strong>Google Calendar</strong> e sincronizzati automaticamente!</p>
+          
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="blocco-data">
+          </div>
+          
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="blocco-tutto-giorno" onchange="toggleTuttoGiorno()">
+              Blocca tutto il giorno (ferie/chiusura)
+            </label>
+          </div>
+          
+          <div id="orari-section">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div class="form-group">
+                <label>Ora Inizio</label>
+                <input type="time" id="blocco-ora-inizio" value="12:00">
+              </div>
+              <div class="form-group">
+                <label>Ora Fine</label>
+                <input type="time" id="blocco-ora-fine" value="13:00">
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Motivo</label>
+            <input type="text" id="blocco-motivo" placeholder="es. Pausa pranzo, Dentista, Formazione...">
+            <small>Apparirà nel tuo Google Calendar</small>
+          </div>
+          
+          <button class="btn btn-primary" onclick="creaBlocco()">🔒 Blocca Orario in Calendar</button>
+          
+          <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; border-left: 4px solid #4CAF50;">
+            <strong style="color: #2e7d32;">💡 Tip:</strong>
+            <p style="color: #388e3c; font-size: 14px; margin-top: 5px;">
+              Puoi anche bloccare orari direttamente dall'app Google Calendar sul tuo smartphone!
+            </p>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3>📋 Orari Bloccati (Google Calendar)</h3>
+          <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Eventi dei prossimi 30 giorni</p>
+          <div id="lista-blocchi"></div>
+        </div>
+        
+      </div>
+    </div>
+    
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyC1uadzxP9qUdkzuOs8Y4cUbtznIP78Hl_es5KTVRsnEa2h6mkhDQWibJ4OlVxwhfeJA/exec';
+    
+    let intervalloRefresh, appuntamentiAttuali = [];
+    let tabAttiva = 'appuntamenti';
+    
+    // GESTIONE TAB
+    function switchTab(tab) {
+      tabAttiva = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      
+      if (tab === 'disponibilita') {
+        caricaBlocchi();
+        document.getElementById('blocco-data').min = new Date().toISOString().split('T')[0];
+      } else if (tab === 'appuntamenti') {
+        aggiornaCalendario();
+      }
+    }
+    
+    function toggleTuttoGiorno() {
+      const checked = document.getElementById('blocco-tutto-giorno').checked;
+      document.getElementById('orari-section').style.display = checked ? 'none' : 'block';
+    }
+    
+    // GESTIONE BLOCCHI
+    async function caricaBlocchi() {
+      const container = document.getElementById('lista-blocchi');
+      container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">⏳ Caricamento da Google Calendar...</div>';
+      
+      try {
+        const response = await fetch(`${API_URL}?action=getBlocchi`);
+        const data = await response.json();
+        
+        if (data.successo && data.blocchi.length > 0) {
+          container.innerHTML = '';
+          
+          data.blocchi.forEach(blocco => {
+            const div = document.createElement('div');
+            div.className = 'blocco-item';
+            
+            const dataFormattata = new Date(blocco.data + 'T00:00:00').toLocaleDateString('it-CH', {
+              weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
+            });
+            
+            const orario = blocco.tuttoIlGiorno ? 
+              '<span style="background: #4CAF50; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 700;">TUTTO IL GIORNO</span>' :
+              `<span>${blocco.oraInizio} - ${blocco.oraFine}</span>`;
+            
+            div.innerHTML = `
+              <div class="blocco-info">
+                <strong>${dataFormattata}</strong>
+                ${orario}
+                <span style="display: block; margin-top: 8px; color: #555;">📝 ${blocco.motivo}</span>
+              </div>
+              <button class="btn-danger" onclick="eliminaBlocco('${blocco.id}')">🗑️</button>
+            `;
+            
+            container.appendChild(div);
+          });
+        } else {
+          container.innerHTML = '<div class="empty-state"><div style="font-size: 60px; opacity: 0.3;">📅</div><p>Nessun blocco in Google Calendar</p><p style="font-size: 14px; color: #999; margin-top: 10px;">Crea il primo blocco o aggiungilo direttamente in Calendar!</p></div>';
+        }
+      } catch (error) {
+        container.innerHTML = '<p style="color: red; text-align: center;">⚠️ Errore caricamento Google Calendar</p>';
+        console.error(error);
+      }
+    }
+    
+    async function creaBlocco() {
+      const data = document.getElementById('blocco-data').value;
+      const tuttoGiorno = document.getElementById('blocco-tutto-giorno').checked;
+      const oraInizio = document.getElementById('blocco-ora-inizio').value;
+      const oraFine = document.getElementById('blocco-ora-fine').value;
+      const motivo = document.getElementById('blocco-motivo').value || 'Orario bloccato';
+      
+      if (!data) {
+        mostraNotifica('⚠️ Seleziona una data');
+        return;
+      }
+      
+      if (!tuttoGiorno && (!oraInizio || !oraFine)) {
+        mostraNotifica('⚠️ Compila gli orari');
+        return;
+      }
+      
+      if (!tuttoGiorno && oraInizio >= oraFine) {
+        mostraNotifica('⚠️ Ora fine deve essere dopo ora inizio');
+        return;
+      }
+      
+      try {
+        let url = `${API_URL}?action=creaBlocco&data=${data}&motivo=${encodeURIComponent(motivo)}`;
+        
+        if (tuttoGiorno) {
+          url += '&tuttoIlGiorno=true';
+        } else {
+          url += `&oraInizio=${oraInizio}&oraFine=${oraFine}`;
+        }
+        
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.successo) {
+          mostraNotifica('✅ Orario bloccato in Google Calendar!');
+          document.getElementById('blocco-motivo').value = '';
+          document.getElementById('blocco-tutto-giorno').checked = false;
+          toggleTuttoGiorno();
+          caricaBlocchi();
+        } else {
+          mostraNotifica('❌ ' + result.messaggio);
+        }
+      } catch (error) {
+        mostraNotifica('❌ Errore connessione');
+        console.error(error);
+      }
+    }
+    
+    async function eliminaBlocco(id) {
+      if (!confirm('Vuoi eliminare questo blocco da Google Calendar?')) return;
+      
+      try {
+        const response = await fetch(`${API_URL}?action=eliminaBlocco&id=${encodeURIComponent(id)}`);
+        const result = await response.json();
+        
+        if (result.successo) {
+          mostraNotifica('✅ Blocco eliminato da Calendar');
+          caricaBlocchi();
+        } else {
+          mostraNotifica('❌ ' + result.messaggio);
+        }
+      } catch (error) {
+        mostraNotifica('❌ Errore connessione');
+        console.error(error);
+      }
+    }
+    
+    // GESTIONE APPUNTAMENTI
+    async function aggiornaCalendario() {
+      const statusBar = document.getElementById('status-bar');
+      const statusText = document.getElementById('status-text');
+      try {
+        statusBar.classList.add('loading');
+        const oggi = new Date().toISOString().split('T')[0];
+        const response = await fetch(`${API_URL}?action=getAppuntamentiOggi&data=${oggi}`);
+        const data = await response.json();
+        if (data.successo) {
+          const nuoviAppuntamenti = data.appuntamenti.length > appuntamentiAttuali.length;
+          if (nuoviAppuntamenti) { mostraNotifica('📅 Nuovo appuntamento!'); playSound(); }
+          appuntamentiAttuali = data.appuntamenti;
+          renderAppuntamenti(data.appuntamenti);
+          aggiornaStatistiche();
+          const ora = new Date().toLocaleTimeString('it-CH', {hour: '2-digit', minute: '2-digit'});
+          statusText.textContent = `Aggiornato ${ora}`;
+        }
+        statusBar.classList.remove('loading');
+      } catch (error) {
+        console.error('Errore refresh:', error);
+        statusText.textContent = '⚠️ Errore connessione';
+        statusBar.classList.remove('loading');
+      }
+    }
+    
+    function renderAppuntamenti(appuntamenti) {
+      const container = document.getElementById('lista-appuntamenti');
+      const scrollPos = window.scrollY;
+      if (appuntamenti.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><h3>Nessun appuntamento oggi</h3><p>Goditi la giornata!</p></div>';
+        return;
+      }
+      container.innerHTML = '';
+      appuntamenti.forEach((app) => {
+        const card = document.createElement('div');
+        card.className = 'appuntamento-card';
+        card.id = `app-${app.id}`;
+        const timestamp = new Date(app.timestamp.split(' ').reverse().join('-'));
+        const isNuovo = (new Date() - timestamp) < 60000;
+        if (isNuovo) card.classList.add('nuovo');
+        let alertAllergie = '';
+        if (app.allergie) alertAllergie = `<div class="info-extra">⚠️ <strong>Allergie:</strong> ${app.allergie}</div>`;
+        let badgeFedelta = '';
+        if (app.conteggioVisite >= 9) badgeFedelta = `<span class="badge-fedelta">🎉 ${app.conteggioVisite}/10 visite</span>`;
+        card.innerHTML = `
+          <div class="card-header">
+            <div><div class="orario">${app.oraInizio} - ${app.oraFine}</div></div>
+            ${isNuovo ? '<span class="badge-nuovo">🆕 NUOVO</span>' : ''}
+            ${badgeFedelta}
+          </div>
+          <div class="cliente-nome">${app.nomeCliente}</div>
+          <div class="servizio-nome">${app.servizio}</div>
+          ${alertAllergie}
+          ${app.noteCliente ? `<div class="info-extra">📝 ${app.noteCliente}</div>` : ''}
+          <div class="presenza-section">
+            <div class="section-title">Presenza</div>
+            <div class="btn-group">
+              <button class="btn btn-presente ${app.status === 'presente' ? 'selected' : ''}" onclick="segnaPresenza(${app.id}, 'presente')">✓ Presente</button>
+              <button class="btn btn-assente ${app.status === 'assente' ? 'selected' : ''}" onclick="segnaPresenza(${app.id}, 'assente')">✗ Assente</button>
+            </div>
+          </div>
+          <div class="prezzo-section" id="prezzo-section-${app.id}" style="display: ${app.status === 'presente' ? 'block' : 'none'}">
+            <div class="prezzo-row">
+              <span style="color: #666;">Listino:</span>
+              <span style="font-weight: 700;">CHF ${app.prezzoListino}</span>
+            </div>
+            <div class="prezzo-row">
+              <span style="color: #333; font-weight: 700;">Prezzo applicato:</span>
+              <div class="prezzo-input">
+                <input type="number" id="prezzo-${app.id}" value="${app.prezzoReale || app.prezzoListino}" step="5" min="0">
+                <span style="font-weight: 700;">CHF</span>
+              </div>
+            </div>
+            <div class="presenza-section">
+              <div class="section-title">Pagamento</div>
+              <div class="btn-group">
+                <button class="btn btn-pagato ${app.pagato === 'si' ? 'selected' : ''}" onclick="segnaPagamento(${app.id}, 'si')">✓ Pagato</button>
+                <button class="btn btn-da-riscuotere ${app.pagato === 'da_riscuotere' ? 'selected' : ''}" onclick="segnaPagamento(${app.id}, 'da_riscuotere')">⏳ Da riscuotere</button>
+              </div>
+            </div>
+            <textarea class="note-input" id="note-${app.id}" placeholder="Note trattamento (es: formula colore, osservazioni...)">${app.note || ''}</textarea>
+            <button class="btn-salva" onclick="salvaAppuntamento(${app.id})">💾 Salva modifiche</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      window.scrollTo(0, scrollPos);
+    }
+    
+    function segnaPresenza(id, status) {
+      const app = appuntamentiAttuali.find(a => a.id === id);
+      if (!app) return;
+      app.status = status;
+      const prezzoSection = document.getElementById(`prezzo-section-${id}`);
+      if (status === 'presente') prezzoSection.style.display = 'block';
+      else prezzoSection.style.display = 'none';
+      const card = document.getElementById(`app-${id}`);
+      card.querySelectorAll('.btn-presente, .btn-assente').forEach(btn => btn.classList.remove('selected'));
+      if (status === 'presente') card.querySelector('.btn-presente').classList.add('selected');
+      else card.querySelector('.btn-assente').classList.add('selected');
+      salvaAppuntamento(id);
+    }
+    
+    function segnaPagamento(id, pagato) {
+      const app = appuntamentiAttuali.find(a => a.id === id);
+      if (!app) return;
+      app.pagato = pagato;
+      const card = document.getElementById(`app-${id}`);
+      card.querySelectorAll('.btn-pagato, .btn-da-riscuotere').forEach(btn => btn.classList.remove('selected'));
+      if (pagato === 'si') card.querySelector('.btn-pagato').classList.add('selected');
+      else card.querySelector('.btn-da-riscuotere').classList.add('selected');
+      aggiornaStatistiche();
+    }
+    
+    async function salvaAppuntamento(id) {
+      const app = appuntamentiAttuali.find(a => a.id === id);
+      if (!app) return;
+      const prezzoReale = document.getElementById(`prezzo-${id}`)?.value || app.prezzoListino;
+      const note = document.getElementById(`note-${id}`)?.value || '';
+      try {
+        const response = await fetch(`${API_URL}?action=aggiornaAppuntamento&id=${id}&status=${app.status}&pagato=${app.pagato || ''}&prezzoReale=${prezzoReale}&note=${encodeURIComponent(note)}`);
+        const data = await response.json();
+        if (data.successo) {
+          mostraNotifica('✓ Salvato!');
+          app.prezzoReale = prezzoReale;
+          aggiornaStatistiche();
+        } else mostraNotifica('❌ Errore salvataggio');
+      } catch (error) { mostraNotifica('❌ Errore connessione'); }
+    }
+    
+    function aggiornaStatistiche() {
+      let presenti = 0, assenti = 0, incassato = 0, daRiscuotere = 0;
+      appuntamentiAttuali.forEach(app => {
+        if (app.status === 'presente') {
+          presenti++;
+          const prezzo = parseFloat(app.prezzoReale || app.prezzoListino);
+          if (app.pagato === 'si') incassato += prezzo;
+          else if (app.pagato === 'da_riscuotere') daRiscuotere += prezzo;
+        } else if (app.status === 'assente') assenti++;
+      });
+      document.getElementById('stat-presenti').textContent = presenti;
+      document.getElementById('stat-assenti').textContent = assenti;
+      document.getElementById('stat-incassato').textContent = `CHF ${incassato.toFixed(0)}`;
+      document.getElementById('stat-da-riscuotere').textContent = `CHF ${daRiscuotere.toFixed(0)}`;
+    }
+    
+    function refreshManuale() {
+      const btn = document.querySelector('.refresh-btn');
+      btn.classList.add('spin');
+      setTimeout(() => btn.classList.remove('spin'), 500);
+      if (tabAttiva === 'appuntamenti') aggiornaCalendario();
+      else if (tabAttiva === 'disponibilita') caricaBlocchi();
+    }
+    
+    function mostraNotifica(messaggio) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = messaggio;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    function playSound() {
+      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYHF2m98OScTgwOUKvm77hlHAU');
+      audio.volume = 0.3;
+      audio.play().catch(() => {});
+    }
+    
+    function avviaAutoRefresh() {
+      aggiornaCalendario();
+      intervalloRefresh = setInterval(aggiornaCalendario, 30000);
+    }
+    
+    document.getElementById('data-oggi').textContent = new Date().toLocaleDateString('it-CH', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+    
+    document.getElementById('blocco-data').min = new Date().toISOString().split('T')[0];
+    
+    window.addEventListener('DOMContentLoaded', avviaAutoRefresh);
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) clearInterval(intervalloRefresh);
+      else avviaAutoRefresh();
+    });
+  </script>
+
+</body>
+</html>
