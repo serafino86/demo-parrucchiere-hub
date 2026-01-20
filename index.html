@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💇 Prenota - Beauty Salon</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    /* CARD STYLES */
+    .card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 40px;
+      margin-bottom: 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.3);
+      animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card h2 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 25px;
+    }
+    
+    /* CALENDARIO MENSILE */
+    .calendario-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    
+    .calendario-header h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .calendario-nav {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .calendario-nav button {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .calendario-nav button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+    
+    .giorni-settimana {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .giorno-settimana {
+      text-align: center;
+      font-weight: 700;
+      color: #777;
+      font-size: 14px;
+      padding: 10px 0;
+    }
+    
+    .giorni-mese {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+    }
+    
+    .giorno {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      border: 2px solid transparent;
+    }
+    
+    .giorno:not(.vuoto):not(.passato):not(.non-lavorativo) {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-color: #e0e0e0;
+    }
+    
+    .giorno:not(.vuoto):not(.passato):not(.non-lavorativo):hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .giorno.selezionato {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+      transform: scale(1.05);
+    }
+    
+    .giorno.passato {
+      color: #ccc;
+      cursor: not-allowed;
+      background: #f5f5f5;
+    }
+    
+    .giorno.non-lavorativo {
+      color: #999;
+      background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+      cursor: not-allowed;
+      position: relative;
+    }
+    
+    .giorno.non-lavorativo::after {
+      content: '🔒';
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      font-size: 12px;
+    }
+    
+    .giorno.vuoto {
+      cursor: default;
+      background: transparent;
+    }
+    
+    .giorno-numero {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    
+    .giorno-badge {
+      font-size: 10px;
+      background: #4CAF50;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-top: 3px;
+    }
+    
+    /* SLOT ORARI */
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .slot {
+      background: white !important;
+      border: 2px solid #e0e0e0 !important;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 700 !important;
+      font-size: 18px !important;
+      color: #000 !important;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .slot:hover {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-color: #2196F3;
+      color: #1565C0;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(33, 150, 243, 0.3);
+    }
+    
+    .slot.selected {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+      transform: scale(1.05);
+    }
+    
+    /* FORM */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+    
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .hidden { display: none !important; }
+    
+    .alert {
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      animation: slideDown 0.4s ease;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .alert-success {
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      color: #2e7d32;
+      border-left: 4px solid #4CAF50;
+    }
+    
+    .alert-error {
+      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+      color: #c62828;
+      border-left: 4px solid #f44336;
+    }
+    
+    .header-app {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header-app h1 {
+      font-size: 42px;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      margin-bottom: 10px;
+    }
+    
+    .header-app p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.9);
+    }
+    
+    .servizio-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .servizio-card:hover {
+      border-color: #667eea;
+      transform: translateX(8px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    }
+    
+    .servizio-card.selected {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-color: #2196F3;
+      box-shadow: 0 8px 20px rgba(33, 150, 243, 0.3);
+    }
+    
+    .servizio-nome {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .servizio-info {
+      display: flex;
+      justify-content: space-between;
+      color: #777;
+      font-size: 14px;
+    }
+    
+    .servizio-prezzo {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    @media (max-width: 768px) {
+      .giorni-mese, .giorni-settimana {
+        gap: 5px;
+      }
+      .slot-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .giorno-numero {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <div class="header-app">
+      <h1>💇 Beauty Salon</h1>
+      <p>Prenota il tuo appuntamento online</p>
+    </div>
+    
+    <!-- STEP 1: LOGIN/REGISTRAZIONE -->
+    <div id="screen-login" class="card">
+      <h2>👋 Accedi</h2>
+      <div id="alert-container"></div>
+      
+      <div class="form-group">
+        <label>Nome</label>
+        <input type="text" id="login-nome" placeholder="Es: MARIA">
+      </div>
+      
+      <div class="form-group">
+        <label>Cognome</label>
+        <input type="text" id="login-cognome" placeholder="Es: ROSSI">
+      </div>
+      
+      <div class="form-group">
+        <label>PIN (6 cifre)</label>
+        <input type="password" id="login-pin" placeholder="123456" maxlength="6">
+      </div>
+      
+      <button class="btn btn-primary" onclick="login()">🔓 Accedi</button>
+      
+      <p style="text-align: center; margin-top: 20px; color: #777;">
+        <a href="#" onclick="toggleRegistrazione(); return false;" style="color: #667eea; text-decoration: none; font-weight: 600;">Prima volta? Registrati qui</a>
+      </p>
+    </div>
+    
+    <!-- SCREEN REGISTRAZIONE -->
+    <div id="screen-registrazione" class="card hidden">
+      <h2>✨ Registrazione</h2>
+      <div id="alert-reg-container"></div>
+      
+      <div class="form-group">
+        <label>Nome</label>
+        <input type="text" id="reg-nome" placeholder="Es: MARIA">
+      </div>
+      
+      <div class="form-group">
+        <label>Cognome</label>
+        <input type="text" id="reg-cognome" placeholder="Es: ROSSI">
+      </div>
+      
+      <div class="form-group">
+        <label>Telefono</label>
+        <input type="tel" id="reg-telefono" placeholder="+41 79 123 45 67">
+      </div>
+      
+      <div class="form-group">
+        <label>Email (opzionale)</label>
+        <input type="email" id="reg-email" placeholder="maria@email.ch">
+      </div>
+      
+      <div class="form-group">
+        <label>Crea PIN (6 cifre)</label>
+        <input type="password" id="reg-pin" placeholder="123456" maxlength="6">
+      </div>
+      
+      <button class="btn btn-primary" onclick="registra()">✅ Registrati</button>
+      
+      <p style="text-align: center; margin-top: 20px; color: #777;">
+        <a href="#" onclick="toggleRegistrazione(); return false;" style="color: #667eea; text-decoration: none; font-weight: 600;">← Torna al login</a>
+      </p>
+    </div>
+    
+    <!-- STEP 2: SCELTA SERVIZIO -->
+    <div id="screen-servizi" class="card hidden">
+      <h2>💅 Scegli il Servizio</h2>
+      <div id="lista-servizi"></div>
+    </div>
+    
+    <!-- STEP 3: CALENDARIO -->
+    <div id="screen-calendario" class="card hidden">
+      <h2>📅 Scegli Data e Ora</h2>
+      
+      <div class="calendario-header">
+        <h3 id="mese-corrente"></h3>
+        <div class="calendario-nav">
+          <button onclick="cambiaM ese(-1)">‹</button>
+          <button onclick="cambiaMese(1)">›</button>
+        </div>
+      </div>
+      
+      <div class="giorni-settimana">
+        <div class="giorno-settimana">Lun</div>
+        <div class="giorno-settimana">Mar</div>
+        <div class="giorno-settimana">Mer</div>
+        <div class="giorno-settimana">Gio</div>
+        <div class="giorno-settimana">Ven</div>
+        <div class="giorno-settimana">Sab</div>
+        <div class="giorno-settimana">Dom</div>
+      </div>
+      
+      <div class="giorni-mese" id="giorni-mese"></div>
+      
+      <div id="slot-container" class="hidden" style="margin-top: 30px;">
+        <h3 style="margin-bottom: 15px; font-weight: 700;">🕐 Orari disponibili</h3>
+        <div class="slot-grid" id="slot-grid"></div>
+      </div>
+      
+      <button class="btn btn-primary" id="btn-conferma" onclick="confermaPrenotazione()" style="margin-top: 30px;" disabled>
+        📝 Conferma Prenotazione
+      </button>
+    </div>
+    
+    <!-- STEP 4: CONFERMA -->
+    <div id="screen-conferma" class="card hidden">
+      <div style="text-align: center;">
+        <div style="font-size: 100px; animation: successPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">🎉</div>
+        <h2>Prenotazione Confermata!</h2>
+        <p style="font-size: 18px; color: #777; margin-top: 15px;" id="riepilogo-prenotazione"></p>
+        <button class="btn btn-primary" onclick="location.reload()" style="margin-top: 30px;">
+          ✨ Fai Nuova Prenotazione
+        </button>
+      </div>
+    </div>
+    
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxBstGx5prpvmwNUTGRFz85y-gbJXYiz3DkXaTF3dJNtYUWAjb7BxqVfpCIqU-J3KKwAQ/exec';
+    
+    let clienteLoggato = null;
+    let servizi = [];
+    let servizioSelezionato = null;
+    let dataSelezionata = null;
+    let slotSelezionato = null;
+    
+    let meseCorrente = new Date().getMonth();
+    let annoCorrente = new Date().getFullYear();
+    
+    // GESTIONE SCHERMO
+    function mostraSchermo(id) {
+      document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+    
+    function toggleRegistrazione() {
+      document.getElementById('screen-login').classList.toggle('hidden');
+      document.getElementById('screen-registrazione').classList.toggle('hidden');
+    }
+    
+    function mostraAlert(container, tipo, messaggio) {
+      const div = document.createElement('div');
+      div.className = `alert alert-${tipo}`;
+      div.textContent = messaggio;
+      document.getElementById(container).innerHTML = '';
+      document.getElementById(container).appendChild(div);
+      setTimeout(() => div.remove(), 5000);
+    }
+    
+    // LOGIN
+    async function login() {
+      const nome = document.getElementById('login-nome').value.trim();
+      const cognome = document.getElementById('login-cognome').value.trim();
+      const pin = document.getElementById('login-pin').value.trim();
+      
+      if (!nome || !cognome || !pin) {
+        mostraAlert('alert-container', 'error', '⚠️ Compila tutti i campi');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_URL}?action=loginCliente&nome=${encodeURIComponent(nome)}&cognome=${encodeURIComponent(cognome)}&pin=${pin}`);
+        const data = await response.json();
+        
+        if (data.successo) {
+          clienteLoggato = data.cliente;
+          await caricaServizi();
+          mostraSchermo('screen-servizi');
+        } else {
+          mostraAlert('alert-container', 'error', '❌ ' + data.messaggio);
+        }
+      } catch (error) {
+        mostraAlert('alert-container', 'error', '❌ Errore connessione');
+      }
+    }
+    
+    // REGISTRAZIONE
+    async function registra() {
+      const nome = document.getElementById('reg-nome').value.trim();
+      const cognome = document.getElementById('reg-cognome').value.trim();
+      const telefono = document.getElementById('reg-telefono').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pin = document.getElementById('reg-pin').value.trim();
+      
+      if (!nome || !cognome || !telefono || !pin) {
+        mostraAlert('alert-reg-container', 'error', '⚠️ Compila tutti i campi obbligatori');
+        return;
+      }
+      
+      if (pin.length !== 6 || !/^\d+$/.test(pin)) {
+        mostraAlert('alert-reg-container', 'error', '⚠️ PIN deve essere 6 cifre');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_URL}?action=registraCliente&nome=${encodeURIComponent(nome)}&cognome=${encodeURIComponent(cognome)}&telefono=${encodeURIComponent(telefono)}&email=${encodeURIComponent(email)}&pin=${pin}`);
+        const data = await response.json();
+        
+        if (data.successo) {
+          mostraAlert('alert-reg-container', 'success', '✅ Registrazione completata! Ora accedi');
+          setTimeout(() => {
+            document.getElementById('login-nome').value = nome;
+            document.getElementById('login-cognome').value = cognome;
+            document.getElementById('login-pin').value = pin;
+            toggleRegistrazione();
+          }, 2000);
+        } else {
+          mostraAlert('alert-reg-container', 'error', '❌ ' + data.messaggio);
+        }
+      } catch (error) {
+        mostraAlert('alert-reg-container', 'error', '❌ Errore connessione');
+      }
+    }
+    
+    // SERVIZI
+    async function caricaServizi() {
+      try {
+        const response = await fetch(`${API_URL}?action=getServizi`);
+        const data = await response.json();
+        
+        if (data.successo) {
+          servizi = data.servizi;
+          renderServizi();
+        }
+      } catch (error) {
+        console.error('Errore caricamento servizi:', error);
+      }
+    }
+    
+    function renderServizi() {
+      const container = document.getElementById('lista-servizi');
+      container.innerHTML = '';
+      
+      servizi.forEach(servizio => {
+        const card = document.createElement('div');
+        card.className = 'servizio-card';
+        card.onclick = () => selezionaServizio(servizio);
+        
+        card.innerHTML = `
+          <div class="servizio-nome">${servizio.nome}</div>
+          <div class="servizio-info">
+            <span>⏱️ ${servizio.durata} minuti</span>
+            <span class="servizio-prezzo">CHF ${servizio.prezzo}</span>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    }
+    
+    function selezionaServizio(servizio) {
+      servizioSelezionato = servizio;
+      renderCalendario();
+      mostraSchermo('screen-calendario');
+    }
+    
+    // CALENDARIO
+    function renderCalendario() {
+      const nomiMesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+      document.getElementById('mese-corrente').textContent = `${nomiMesi[meseCorrente]} ${annoCorrente}`;
+      
+      const container = document.getElementById('giorni-mese');
+      container.innerHTML = '';
+      
+      const primoGiorno = new Date(annoCorrente, meseCorrente, 1);
+      const ultimoGiorno = new Date(annoCorrente, meseCorrente + 1, 0);
+      const giornoSettimana = primoGiorno.getDay();
+      const offset = giornoSettimana === 0 ? 6 : giornoSettimana - 1;
+      
+      const oggi = new Date();
+      oggi.setHours(0, 0, 0, 0);
+      
+      // Giorni vuoti iniziali
+      for (let i = 0; i < offset; i++) {
+        const vuoto = document.createElement('div');
+        vuoto.className = 'giorno vuoto';
+        container.appendChild(vuoto);
+      }
+      
+      // Giorni del mese
+      for (let giorno = 1; giorno <= ultimoGiorno.getDate(); giorno++) {
+        const data = new Date(annoCorrente, meseCorrente, giorno);
+        const div = document.createElement('div');
+        div.className = 'giorno';
+        
+        const dataStr = data.toISOString().split('T')[0];
+        
+        // Passato
+        if (data < oggi) {
+          div.classList.add('passato');
+        } 
+        // Domenica
+        else if (data.getDay() === 0) {
+          div.classList.add('non-lavorativo');
+        }
+        // Selezionabile
+        else {
+          div.onclick = () => selezionaData(dataStr, div);
+        }
+        
+        const numero = document.createElement('div');
+        numero.className = 'giorno-numero';
+        numero.textContent = giorno;
+        div.appendChild(numero);
+        
+        container.appendChild(div);
+      }
+    }
+    
+    function cambiaMese(delta) {
+      meseCorrente += delta;
+      if (meseCorrente < 0) {
+        meseCorrente = 11;
+        annoCorrente--;
+      } else if (meseCorrente > 11) {
+        meseCorrente = 0;
+        annoCorrente++;
+      }
+      renderCalendario();
+      document.getElementById('slot-container').classList.add('hidden');
+    }
+    
+    async function selezionaData(data, elemento) {
+      dataSelezionata = data;
+      slotSelezionato = null;
+      
+      document.querySelectorAll('.giorno').forEach(g => g.classList.remove('selezionato'));
+      elemento.classList.add('selezionato');
+      
+      await caricaSlot();
+    }
+    
+    async function caricaSlot() {
+      const container = document.getElementById('slot-grid');
+      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #666;">⏳ Caricamento orari...</div>';
+      document.getElementById('slot-container').classList.remove('hidden');
+      
+      try {
+        const url = `${API_URL}?action=getSlotDisponibili&data=${dataSelezionata}&servizio=${encodeURIComponent(servizioSelezionato.nome)}`;
+        console.log('🔍 Caricamento slot:', url);
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        console.log('📊 Risposta slot:', data);
+        
+        if (data.successo && data.slot.length > 0) {
+          container.innerHTML = '';
+          console.log('✅ Slot trovati:', data.slot.length);
+          
+          data.slot.forEach((slot, index) => {
+            console.log(`Slot ${index}:`, slot, 'Orario:', slot.ora || slot.inizio);
+            const div = document.createElement('div');
+            div.className = 'slot';
+            
+            // FORZA IL TESTO in modo aggressivo
+            div.textContent = slot.ora || slot.inizio || '??:??';
+            div.innerHTML = `<strong style="color: #000 !important; font-size: 18px !important;">${slot.ora || slot.inizio || '??:??'}</strong>`;
+            div.setAttribute('data-ora', slot.ora || slot.inizio);
+            div.style.color = '#000';
+            div.style.fontSize = '18px';
+            div.style.fontWeight = '700';
+            
+            div.onclick = () => selezionaSlot(slot.ora || slot.inizio, div);
+            container.appendChild(div);
+            
+            console.log('✅ Slot creato:', div.textContent, 'Visibile:', div.offsetHeight > 0);
+          });
+        } else {
+          console.warn('⚠️ Nessuno slot disponibile');
+          container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #999;">😔 Nessun orario disponibile per questa data</div>';
+        }
+      } catch (error) {
+        console.error('❌ Errore caricamento slot:', error);
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: red;">❌ Errore caricamento orari</div>';
+      }
+    }
+    
+    function selezionaSlot(ora, elemento) {
+      slotSelezionato = ora;
+      document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+      elemento.classList.add('selected');
+      document.getElementById('btn-conferma').disabled = false;
+    }
+    
+    async function confermaPrenotazione() {
+      if (!dataSelezionata || !slotSelezionato) return;
+      
+      try {
+        const response = await fetch(`${API_URL}?action=creaAppuntamento&idCliente=${clienteLoggato.id}&data=${dataSelezionata}&ora=${slotSelezionato}&servizio=${encodeURIComponent(servizioSelezionato.nome)}`);
+        const data = await response.json();
+        
+        if (data.successo) {
+          const dataFormattata = new Date(dataSelezionata + 'T00:00:00').toLocaleDateString('it-CH', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+          });
+          
+          document.getElementById('riepilogo-prenotazione').innerHTML = `
+            <strong>${servizioSelezionato.nome}</strong><br>
+            ${dataFormattata}<br>
+            Ore ${slotSelezionato}<br>
+            <span style="color: #4CAF50; font-weight: 700;">CHF ${servizioSelezionato.prezzo}</span>
+          `;
+          
+          mostraSchermo('screen-conferma');
+        } else {
+          alert('❌ ' + data.messaggio);
+        }
+      } catch (error) {
+        alert('❌ Errore connessione');
+      }
+    }
+    
+    // AUTO-FOCUS
+    document.getElementById('login-nome').focus();
+  </script>
+
+</body>
+</html>
